@@ -5,7 +5,7 @@ import cors from "cors";
 import categoryRoute from "./routes/category.js";
 import productRoute from "./routes/product.js";
 import UserRoute from "./routes/user.js";
-
+import authJwt from "./helpers/jwt.js";
 
 const app = express();
 //enable cors
@@ -34,10 +34,10 @@ mongoose
   });
 
 //middleware
+app.use(authJwt()); //use jwt middleware
 app.use("/api/v1/categories", categoryRoute);
 app.use("/api/v1/products", productRoute);
 app.use("/api/v1", UserRoute);
-
 
 //connect to server
 app.listen(port, () => {
