@@ -22,6 +22,18 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+//static files
+import { fileURLToPath } from "url";
+import path from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(
+  "/public/uploads",
+  express.static(path.join(__dirname, "public/uploads"))
+); //static files
+
 //connect to mongodb
 mongoose
   .connect(process.env.DATA_BASE_URL, {

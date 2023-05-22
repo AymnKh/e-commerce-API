@@ -1,12 +1,20 @@
+import { isValidObjectId } from "mongoose";
 import Product from "../models/product.js";
 import Http from "http-status-codes";
 export function addProduct(req, res) {
+  const file = req.file;
+  if (!file)
+    return res
+      .status(Http.NOT_FOUND)
+      .json({ message: "No image in the request" });
+
+  const fileName = file.filename;
+  const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
   const newProduct = new Product({
     name: req.body.name,
     description: req.body.description,
     richDescription: req.body.richDescription,
-    image: req.body.image,
-    images: req.body.images,
+    image: `${basePath}${fileName}`,
     brand: req.body.brand,
     price: req.body.price,
     category: req.body.category,
@@ -188,4 +196,53 @@ export function getProductsCount(req, res) {
       count: count,
     });
   });
+}
+export function uploadGalleryImages(req, res) {
+  const productId = req.params.id; // Get the product id from the request
+  if (!isValidObjectId(productId)) {
+    // If the product id is not a valid object id
+    return res.status(Http.BAD_REQUEST).json({
+      success: false,
+      message: "Invalid product id", // Return an error message
+    });
+  }
+  const files = req.files;
+  let imagesPaths = [];
+  const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+
+  if (files) {
+    files.map((file) => {
+      imagesPaths.push(`${basePath}${file.filename}`);
+    });
+  }
+  Product.findByIdAndUpdate(
+    {
+      _id: productId,
+    },
+    {
+      images: imagesPaths,
+    }
+  )
+    .then((result) => {
+      if (!result) {
+        // If the product is not found
+        return res.status(Http.NOT_FOUND).json({
+          success: false,
+          message: "Product not found", // Return an error message
+        });
+      }
+      return res.status(Http.OK).json({
+        // If the product is found and deleted
+        success: true,
+        message: "Product updated", // Return a success message
+      });
+    })
+    .catch((err) => {
+      // If there is a server error
+      return res.status(Http.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Server error",
+        error: err,
+      });
+    });
 }

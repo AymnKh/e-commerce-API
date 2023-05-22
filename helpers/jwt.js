@@ -25,6 +25,9 @@ const authJwt = () => {
     path: [
       { url: "/api/v1/login", methods: ["POST"] },
       { url: "/api/v1/register", methods: ["POST"] },
+      //public uploads
+      { url: /\/public\/uploads(.*)/, methods: ["GET", "OPTIONS"] },
+      { url: /\/api\/v1\/products(.*)/, methods: ["GET", "OPTIONS"] },
     ],
   });
 };
